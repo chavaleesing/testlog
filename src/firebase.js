@@ -1,19 +1,18 @@
 const admin = require('firebase-admin');
-const path = require('path');
 
 let db;
 
 function initFirebase() {
   if (admin.apps.length) return admin.app();
 
-  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-  const absolutePath = path.resolve(serviceAccountPath);
-
   let credential;
-  try {
-    const serviceAccount = require(absolutePath);
-    credential = admin.credential.cert(serviceAccount);
-  } catch {
+  
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    // Parse JSON from environment variable
+    credential = admin.credential.cert(
+      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+    );
+  } else {
     // Fall back to application default credentials (e.g. Cloud Run)
     credential = admin.credential.applicationDefault();
   }
